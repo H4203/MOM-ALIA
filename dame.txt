@@ -1,0 +1,3 @@
+:- dynamic pion/3.
+
+init :- assert(pion(0,0)), play('b').
