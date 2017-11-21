@@ -4,6 +4,13 @@
 gameover :- not(pion(X,Y,0)), writeln('Les noirs ont gagné').
 gameover :- not(pion(X,Y,1)), writeln('Les blancs ont gagné').
 
+nextPlayer('b','w').
+nextPlayer('w','b').
+
+play(Player) :- gameover.
+play(Player) :- write('New turn for:'), writeln(Player),
+        displayBoard, aiLevel(Niveau, Player), ai(Niveau,ActionList,Pawn,Player), 
+        applyActions(Actions,Pawn), nextPlayer(Player,NextPlayer), play(NextPlayer). 
 
 init :- assert(pawn(1,0,'b')), assert(pawn(3,0,'b')), assert(pawn(5,0,'b')), assert(pawn(7,0,'b')), assert(pawn(9,0,'b')),
         assert(pawn(0,1,'b')), assert(pawn(2,1,'b')), assert(pawn(4,1,'b')), assert(pawn(6,1,'b')), assert(pawn(8,1,'b')),
