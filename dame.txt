@@ -1,5 +1,8 @@
 :- dynamic pion/3.
 
+gameover :- not(pion(X,Y,0)), writeln('Les noirs ont gagné').
+gameover :- not(pion(X,Y,1)), writeln('Les blancs ont gagné').
+
 init :- assert(pion(1,0,1)), assert(pion(3,0,1)), assert(pion(5,0,1)), assert(pion(7,0,1)), assert(pion(9,0,1)),
         assert(pion(0,1,1)), assert(pion(2,1,1)), assert(pion(4,1,1)), assert(pion(6,1,1)), assert(pion(8,1,1)),
         assert(pion(1,2,1)), assert(pion(3,2,1)), assert(pion(5,2,1)), assert(pion(7,2,1)), assert(pion(9,2,1)),
