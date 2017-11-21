@@ -4,6 +4,24 @@
 gameover :- not(pion(X,Y,0)), writeln('Les noirs ont gagné').
 gameover :- not(pion(X,Y,1)), writeln('Les blancs ont gagné').
 
+printVal(Y,X) :- not(pion(Y,X,_)),Y\==9,write('_'). %,nonvar(Val)
+printVal(Y,X) :- pion(Y,X,Val),Y\==9, write(Val).  %, var(Val)
+printVal(9,X):- not(pion(9,X,_)),writeln('_').
+printVal(9,X):- pion(9,X,Val),writeln(Val).
+
+
+displayBoard:-
+    printVal(0,0),printVal(1,0),printVal(2,0),printVal(3,0),printVal(4,0),printVal(5,0),printVal(6,0),printVal(7,0),printVal(8,0),printVal(9,0),
+	printVal(0,1),printVal(1,1),printVal(2,1),printVal(3,1),printVal(4,1),printVal(5,1),printVal(6,1),printVal(7,1),printVal(8,1),printVal(9,1),    
+	printVal(0,2),printVal(1,2),printVal(2,2),printVal(3,2),printVal(4,2),printVal(5,2),printVal(6,2),printVal(7,2),printVal(8,2),printVal(9,2),    
+	printVal(0,3),printVal(1,3),printVal(2,3),printVal(3,3),printVal(4,3),printVal(5,3),printVal(6,3),printVal(7,3),printVal(8,3),printVal(9,3),    
+	printVal(0,4),printVal(1,4),printVal(2,4),printVal(3,4),printVal(4,4),printVal(5,4),printVal(6,4),printVal(7,4),printVal(8,4),printVal(9,4),   
+	printVal(0,5),printVal(1,5),printVal(2,5),printVal(3,5),printVal(4,5),printVal(5,5),printVal(6,5),printVal(7,5),printVal(8,5),printVal(9,5),
+    printVal(0,6),printVal(1,6),printVal(2,6),printVal(3,6),printVal(4,6),printVal(5,6),printVal(6,6),printVal(7,6),printVal(8,6),printVal(9,6),
+    printVal(0,7),printVal(1,7),printVal(2,7),printVal(3,7),printVal(4,7),printVal(5,7),printVal(6,7),printVal(7,7),printVal(8,7),printVal(9,7),
+    printVal(0,8),printVal(1,8),printVal(2,8),printVal(3,8),printVal(4,8),printVal(5,8),printVal(6,8),printVal(7,8),printVal(8,8),printVal(9,8),
+    printVal(0,9),printVal(1,9),printVal(2,9),printVal(3,9),printVal(4,9),printVal(5,9),printVal(6,9),printVal(7,9),printVal(8,9),printVal(9,9).
+
 nextPlayer('b','w').
 nextPlayer('w','b').
 
