@@ -1,0 +1,77 @@
+:- dynamic pawn/3.
+:-dynamic action/3.
+init :- assert(pawn(1,0,'b')), assert(pawn(3,0,'b')), assert(pawn(5,0,'b')), assert(pawn(7,0,'b')), assert(pawn(9,0,'b')),
+        assert(pawn(0,1,'b')), assert(pawn(2,1,'b')), assert(pawn(4,1,'b')), assert(pawn(6,1,'b')), assert(pawn(8,1,'b')),
+        assert(pawn(1,2,'b')), assert(pawn(3,2,'b')), assert(pawn(5,2,'b')), assert(pawn(7,2,'b')), assert(pawn(9,2,'b')),
+        assert(pawn(0,3,'b')), assert(pawn(2,3,'b')), assert(pawn(4,3,'b')), assert(pawn(6,3,'b')), assert(pawn(8,3,'b')),
+        
+        assert(pawn(1,6,'w')), assert(pawn(3,6,'w')), assert(pawn(5,6,'w')), assert(pawn(7,6,'w')), assert(pawn(9,6,'w')),
+        assert(pawn(0,7,'w')), assert(pawn(2,7,'w')), assert(pawn(4,7,'w')), assert(pawn(6,7,'w')), assert(pawn(8,7,'w')),
+        assert(pawn(1,8,'w')), assert(pawn(3,8,'w')), assert(pawn(5,8,'w')), assert(pawn(7,8,'w')), assert(pawn(9,8,'w')),
+        assert(pawn(0,9,'w')), assert(pawn(2,9,'w')), assert(pawn(4,9,'w')), assert(pawn(6,9,'w')), assert(pawn(8,9,'w')).
+%        play('b').
+%-------------------------------
+ailevel(1,'w').
+ailevel(1,'b').
+%-------------------------------
+isSameGroup('w','w').
+isSameGroup('wq','w').
+isSameGroup('w','wq').
+
+isSameGroup('b','b').
+isSameGroup('bq','b').
+isSameGroup('b','bq').
+%-------------------------------
+
+% direction 0:up-left 1:up-right 2:down-left 3:down-right
+isGoodDirection(0,'w').
+isGoodDirection(1,'w').
+isGoodDirection(2,'b').
+isGoodDirection(3,'b').
+isGoodDirection(_,'wq').
+isGoodDirection(_,'bq').
+
+
+computeNewPosition(0,NumberOfCases,OldX,OldY,NewX,NewY):-NewX is OldX-NumberOfCases, NewY is OldY-NumberOfCases.
+computeNewPosition(1,NumberOfCases,OldX,OldY,NewX,NewY):-NewX is OldX+NumberOfCases, NewY is OldY-NumberOfCases.
+computeNewPosition(2,NumberOfCases,OldX,OldY,NewX,NewY):-NewX is OldX-NumberOfCases, NewY is OldY+NumberOfCases.
+computeNewPosition(3,NumberOfCases,OldX,OldY,NewX,NewY):-NewX is OldX+NumberOfCases, NewY is OldY+NumberOfCases.
+
+choosePawn(Player,pawn(X,Y,Role)):-repeat,X is random(10), Y is random(10),pawn(X,Y,Role),isSameGroup(Role,Player),isPlayable(pawn(X,Y,Role)),!.
+
+% test if pawn is playable
+isPlayable(pawn(X,Y,Role)) :- isGoodDirection(Direction,Role),
+    							computeNewPosition(Direction,1,X,Y,NewX,NewY),
+    									( 		pawn(NewX,NewY,NewRole), 
+                                       			not(isSameGroup(Role,NewRole)),
+                                            	computeNewPosition(0,2,X,Y,NewX2,NewY2), 
+                                        		not(pawn(NewX2,NewY2,Role))
+                                        	;
+                                        		not(pawn(NewX,NewY,Role)) 
+                                        ).
+chooseDirection(Direction,X,Y,Role,ActionList):-repeat, 
+    									Direction is random(4), 
+    									isGoodDirection(Direction,Role),
+    									computeNewPosition(Direction,1,X,Y,NewX,NewY),
+    									( 		pawn(NewX,NewY,NewRole), 
+                                       			not(isSameGroup(Role,NewRole)),
+                                            	computeNewPosition(Direction,2,X,Y,NewX2,NewY2), 
+                                        		not(pawn(NewX2,NewY2,Role)), addAction ( ActionList, 'Eat', NewX2, NewY2)
+                                            
+                                        	;
+                                        		not(pawn(NewX,NewY,Role)) 
+                                        ),
+    									!.
+
+
+
+
+%createAction(pawn direction action).
+%appendaction(list,newlist).
+
+ai(1,Player,pawn(X,Y,Role),ActionList):-choosePawn(Player,pawn(X,Y,Role)),
+   									chooseDirection(Direction,X,Y,Role),
+    								createAction(Pawn,Direction,Action),
+                    appendAction(list,newlist),
+                    faire la boucle s'il eat.
+    
