@@ -1,13 +1,13 @@
 :- dynamic pawn/3.
 
 
-gameover :- not(pion(X,Y,0)), writeln('Les noirs ont gagné').
-gameover :- not(pion(X,Y,1)), writeln('Les blancs ont gagné').
+gameover :- not(pawn(X,Y,0)), writeln('Les noirs ont gagné').
+gameover :- not(pawn(X,Y,1)), writeln('Les blancs ont gagné').
 
-printVal(Y,X) :- not(pion(Y,X,_)),Y\==9,write('_'). %,nonvar(Val)
-printVal(Y,X) :- pion(Y,X,Val),Y\==9, write(Val).  %, var(Val)
-printVal(9,X):- not(pion(9,X,_)),writeln('_').
-printVal(9,X):- pion(9,X,Val),writeln(Val).
+printVal(Y,X) :- not(pawn(Y,X,_)),Y\==9,write('_'). %,nonvar(Val)
+printVal(Y,X) :- pawn(Y,X,Val),Y\==9, write(Val).  %, var(Val)
+printVal(9,X):- not(pawn(9,X,_)),writeln('_').
+printVal(9,X):- pawn(9,X,Val),writeln(Val).
 
 
 displayBoard:-
