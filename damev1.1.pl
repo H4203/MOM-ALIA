@@ -22,7 +22,7 @@ partialDisplayBoard :-
     between(0, 9, I), writeln(''),
     between(0, 9, J),
     printVal(I,J).
-
+	
 % do not delete needed to make applyEat work properly
 nextPlayer('b','w').
 nextPlayer('w','b').
@@ -87,14 +87,14 @@ applyActions(Actions, Pawn) :-
     applyAction(Head, Pawn),
     applyActions(Tail, Pawn).
 
-play(_) :- gameover.
+%play(_) :- gameover.
 play(Player) :- write('New turn for:'), writeln(Player),
     displayBoard,
     aiLevel(Niveau, Player),
     ai(Niveau,Player,Pawn,ActionList),
-    applyActions(ActionList,Pawn),
-    nextPlayer(Player,NextPlayer),
-    play(NextPlayer).
+    applyActions(ActionList,Pawn).
+    %nextPlayer(Player,NextPlayer),
+    %play(NextPlayer).
 
 init :-
     retractall(pawn(_,_,_)),retractall(action(_,_,_)),
@@ -106,8 +106,7 @@ init :-
     assert(pawn(1,6,'w')), assert(pawn(3,6,'w')), assert(pawn(5,6,'w')), assert(pawn(7,6,'w')), assert(pawn(9,6,'w')),
     assert(pawn(0,7,'w')), assert(pawn(2,7,'w')), assert(pawn(4,7,'w')), assert(pawn(6,7,'w')), assert(pawn(8,7,'w')),
     assert(pawn(1,8,'w')), assert(pawn(3,8,'w')), assert(pawn(5,8,'w')), assert(pawn(7,8,'w')), assert(pawn(9,8,'w')),
-    assert(pawn(0,9,'w')), assert(pawn(2,9,'w')), assert(pawn(4,9,'w')), assert(pawn(6,9,'w')), assert(pawn(8,9,'w')),
-   play('b').
+    assert(pawn(0,9,'w')), assert(pawn(2,9,'w')), assert(pawn(4,9,'w')), assert(pawn(6,9,'w')), assert(pawn(8,9,'w')).
 
 %-------------------------------
 aiLevel(1,'w').
