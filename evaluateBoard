@@ -1,0 +1,70 @@
+:- dynamic pawn/3.
+
+% pawn_value(+player, +pawn, -value)
+pawnValue('w', 'w', 1).
+pawnValue('w', 'b', -1).
+pawnValue('w', 'wq', 5).
+pawnValue('w', 'bq', -5).
+pawnValue('b', 'w', -1).
+pawnValue('b', 'b', 1).
+pawnValue('b', 'wq', -5).
+pawnValue('b', 'bq', 5).
+
+% board_weight(+pawn,+X,+Y,-value).
+boardWeight('w',_,0,5).
+boardWeight('w',_,1,4).
+boardWeight('w',_,2,3).
+boardWeight('w',_,3,2).
+boardWeight('w',_,6,2).
+boardWeight('w',_,7,3).
+boardWeight('w',_,8,4).
+boardWeight('w',_,9,5).
+boardWeight('w',_,_,1).
+
+boardWeight('b',_,0,5).
+boardWeight('b',_,1,4).
+boardWeight('b',_,2,3).
+boardWeight('b',_,3,2).
+boardWeight('b',_,6,2).
+boardWeight('b',_,7,3).
+boardWeight('b',_,8,4).
+boardWeight('b',_,9,5).
+boardWeight('b',_,_,1).
+
+boardWeight('bq',_,0,5).
+boardWeight('bq',_,1,4).
+boardWeight('bq',_,2,3).
+boardWeight('bq',_,3,2).
+boardWeight('bq',_,6,2).
+boardWeight('bq',_,7,3).
+boardWeight('bq',_,8,4).
+boardWeight('bq',_,9,5).
+boardWeight('bq',_,_,1).
+
+boardWeight('wq',_,0,5).
+boardWeight('wq',_,1,4).
+boardWeight('wq',_,2,3).
+boardWeight('wq',_,3,2).
+boardWeight('wq',_,6,2).
+boardWeight('wq',_,7,3).
+boardWeight('wq',_,8,4).
+boardWeight('wq',_,9,5).
+boardWeight('wq',_,_,1).
+
+boardWeight(_,_,_,1).
+
+% synonym : utility == evaluateBoard
+utility(Pos,Val):-
+    evaluateBoard(Pos,Val).
+
+evaluateBoard([Player,State,[pawn(X,Y,Pawn)]],Val):-
+    	pawnValue(Player,Pawn, PawnValue),
+        boardWeight(Pawn,X,Y,Weight),
+    	Val is PawnValue * Weight,!.
+
+
+evaluateBoard([Player,State,[pawn(X,Y,Pawn)|Tail]], Val) :-
+        pawnValue(Player,Pawn, PawnValue),
+        boardWeight(Pawn,X,Y,Weight),
+    	evaluateBoard([Player,State,Tail], Eval),
+    	Val is Eval + PawnValue * Weight,!.
