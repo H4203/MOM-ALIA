@@ -32,6 +32,9 @@ def selectPawn(playerColor) :
 
     pawnSelected = 0;
 
+    display();
+    pygame.display.flip();
+
     while (pawnSelected == 0) :
 
         for event in pygame.event.get() :
@@ -62,7 +65,7 @@ def selectPawn(playerColor) :
 
 
 
-def selectAction(pawn):
+def selectAction(pawn, onlyEatAllowed):
 
     action = ["", -1, -1];
 
@@ -71,21 +74,30 @@ def selectAction(pawn):
     actionType = ["'Move'", "'Eat'"];
     allowedDirectionStep = [0, 0, 0, 0];
 
-    iActionType = 0;
+    if (onlyEatAllowed == 1):
+
+        iActionType = 1;
+
+    else :
+
+        iActionType = 0;
 
     while (iActionType < 2) :
 
         for sol in prolog.query("isGoodAction(" + actionType[iActionType] + ", pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + (str)(pawn[2]) + "), Direction).") :
 
-            iAllowedDirectionStep = 0;
+            if ((((int)(sol["Direction"]) == 0 or (int)(sol["Direction"]) == 1) and pawn[2] == 'w') or
+                (((int)(sol["Direction"]) == 2 or (int)(sol["Direction"]) == 3) and pawn[2] == 'b')): 
 
-            while (iAllowedDirectionStep < 4) :
+                iAllowedDirectionStep = 0;
 
-                if ((int)(sol["Direction"]) == iAllowedDirectionStep):
+                while (iAllowedDirectionStep < 4) :
 
-                    allowedDirectionStep[iAllowedDirectionStep] = iActionType + 1;
+                    if ((int)(sol["Direction"]) == iAllowedDirectionStep):
 
-                iAllowedDirectionStep = iAllowedDirectionStep + 1;
+                        allowedDirectionStep[iAllowedDirectionStep] = iActionType + 1;
+
+                    iAllowedDirectionStep = iAllowedDirectionStep + 1;
 
         iActionType = iActionType + 1;
 
@@ -99,28 +111,42 @@ def selectAction(pawn):
 
             if (event.type == pygame.KEYDOWN) :
 
+                if (event.key == pygame.K_RETURN) :
+
+                    action[0] = "done";
+
+                    actionSelected = 1;
+
                 if (event.key == pygame.K_ESCAPE) :
 
-                    actionSelected = -1;
+                    if (onlyEatAllowed == 1) :
+
+                        action[0] = "done";
+
+                    else :
+
+                        action[0] = "cancel";
+
+                    actionSelected = 1;
 
             if (event.type == pygame.MOUSEMOTION) :
 
                 mouseX = pygame.mouse.get_pos()[0] / 50;
                 mouseY = pygame.mouse.get_pos()[1] / 50;
 
-                if (allowedDirectionStep[0] != "" and mouseX == pawn[0] - allowedDirectionStep[0] and mouseY == pawn[1] - allowedDirectionStep[0]) :
+                if (allowedDirectionStep[0] != 0 and mouseX == pawn[0] - allowedDirectionStep[0] and mouseY == pawn[1] - allowedDirectionStep[0]) :
 
                     fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
 
-                elif (allowedDirectionStep[1] != "" and mouseX == pawn[0] + allowedDirectionStep[1] and mouseY == pawn[1] - allowedDirectionStep[1]) :
+                elif (allowedDirectionStep[1] != 0 and mouseX == pawn[0] + allowedDirectionStep[1] and mouseY == pawn[1] - allowedDirectionStep[1]) :
 
                     fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
 
-                elif (allowedDirectionStep[2] != "" and mouseX == pawn[0] - allowedDirectionStep[2] and mouseY == pawn[1] + allowedDirectionStep[2]) :
+                elif (allowedDirectionStep[2] != 0 and mouseX == pawn[0] - allowedDirectionStep[2] and mouseY == pawn[1] + allowedDirectionStep[2]) :
 
                     fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
 
-                elif (allowedDirectionStep[3] != "" and mouseX == pawn[0] + allowedDirectionStep[3] and mouseY == pawn[1] + allowedDirectionStep[3]) :
+                elif (allowedDirectionStep[3] != 0 and mouseX == pawn[0] + allowedDirectionStep[3] and mouseY == pawn[1] + allowedDirectionStep[3]) :
 
                     fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
 
@@ -128,7 +154,7 @@ def selectAction(pawn):
 
             if (event.type == pygame.MOUSEBUTTONDOWN) :
 
-                if (allowedDirectionStep[0] != "" and mouseX == pawn[0] - allowedDirectionStep[0] and mouseY == pawn[1] - allowedDirectionStep[0]) :
+                if (allowedDirectionStep[0] != 0 and mouseX == pawn[0] - allowedDirectionStep[0] and mouseY == pawn[1] - allowedDirectionStep[0]) :
 
                     action[0] = allowedDirectionStep[0];
                     action[1] = pawn[0] - allowedDirectionStep[0];
@@ -136,7 +162,7 @@ def selectAction(pawn):
 
                     actionSelected = 1;
                     
-                elif (allowedDirectionStep[1] != "" and mouseX == pawn[0] + allowedDirectionStep[1] and mouseY == pawn[1] - allowedDirectionStep[1]) :
+                elif (allowedDirectionStep[1] != 0 and mouseX == pawn[0] + allowedDirectionStep[1] and mouseY == pawn[1] - allowedDirectionStep[1]) :
 
                     action[0] = allowedDirectionStep[1];
                     action[1] = pawn[0] + allowedDirectionStep[1];
@@ -144,7 +170,7 @@ def selectAction(pawn):
 
                     actionSelected = 1;
                        
-                elif (allowedDirectionStep[2] != "" and mouseX == pawn[0] - allowedDirectionStep[2] and mouseY == pawn[1] + allowedDirectionStep[2]) :
+                elif (allowedDirectionStep[2] != 0 and mouseX == pawn[0] - allowedDirectionStep[2] and mouseY == pawn[1] + allowedDirectionStep[2]) :
 
                     action[0] = allowedDirectionStep[2];
                     action[1] = pawn[0] - allowedDirectionStep[2];
@@ -152,7 +178,7 @@ def selectAction(pawn):
 
                     actionSelected = 1;
                        
-                elif (allowedDirectionStep[3] != "" and mouseX == pawn[0] + allowedDirectionStep[3] and mouseY == pawn[1] + allowedDirectionStep[3]) :
+                elif (allowedDirectionStep[3] != 0 and mouseX == pawn[0] + allowedDirectionStep[3] and mouseY == pawn[1] + allowedDirectionStep[3]) :
 
                     action[0] = allowedDirectionStep[3];
                     action[1] = pawn[0] + allowedDirectionStep[3];
@@ -164,7 +190,7 @@ def selectAction(pawn):
 
         action[0] = "'Move'";
 
-    else :
+    elif (action[0] == 2) :
 
         action[0] = "'Eat'";
 
@@ -201,7 +227,7 @@ list(prolog.query("init."));
 display();
 pygame.display.flip();
 
-players = [["w", "Human"], ["b", "AI"]];
+players = [["w", "Human"], ["b", "Human"]];
 currentPlayer = 0;
 
 running = 1;
@@ -210,19 +236,33 @@ while (running == 1) :
 
     if (players[currentPlayer][1] == "Human") :
 
-        action = ["", -1, -1];
+        action = ["cancel", -1, -1];
 
-        while (action[1] == -1) :
+        while (action[0] == "cancel") :
 
             pawn = selectPawn(players[currentPlayer][0]);
 
-            action = selectAction(pawn);
+            action = selectAction(pawn, 0);
 
-            display();
-            pygame.display.flip();
+            if (action[0] != "cancel") :
 
-        list(prolog.query("applyAction(action(" + action[0] + ", " + (str)(action[1]) + ", " + (str)(action[2]) + "), " +
-                                      "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
+                list(prolog.query("applyAction(action(" + action[0] + ", " + (str)(action[1]) + ", " + (str)(action[2]) + "), " +
+                                              "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
+
+            if (action[0] == "'Eat'") :
+
+                pawn = [action[1], action[2], pawn[2]];
+
+                while (action[0] != "done") :
+
+                    action = selectAction(pawn, 1);
+
+                    if (action[0] != "done") :
+
+                        list(prolog.query("applyAction(action(" + action[0] + ", " + (str)(action[1]) + ", " + (str)(action[2]) + "), " +
+                                                      "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
+
+                        pawn = [action[1], action[2], pawn[2]];
                 
     else :
 
