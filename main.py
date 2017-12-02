@@ -8,39 +8,179 @@ import time
 
 
 
-def display(fenetre, back, blackPawn, whitePawn) :
+def display() :
 
-    fenetre.blit(back, (0,0));
+    fenetre.blit(backImage, (0,0));
 
-    list(prolog.query("pawn(X,Y,Player)."));
-
-    for sol in prolog.query("pawn(X,Y,Player)."):
+    for sol in prolog.query("pawn(X, Y, Player)."):
 
         if (sol["Player"] == 'w'):
 
-            fenetre.blit(whitePawn, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50));
+            fenetre.blit(whitePawnImage, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50));
 
         elif (sol["Player"] == 'b'):
 
-            fenetre.blit(blackPawn, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50)); 
-
-    pygame.display.flip();
+            fenetre.blit(blackPawnImage, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50)); 
 
     return;
 
 
 
+def selectPawn(playerColor) :
+
+    pawn = [0, 0, playerColor];
+
+    pawnSelected = 0;
+
+    while (pawnSelected == 0) :
+
+        for event in pygame.event.get() :
+
+            mouseX = pygame.mouse.get_pos()[0] / 50;
+            mouseY = pygame.mouse.get_pos()[1] / 50; 
+
+            if (event.type == pygame.MOUSEMOTION) :
+
+                display();
+
+                for sol in prolog.query("pawn(" + (str)(mouseX) + ", " + str(mouseY) + ", " + playerColor + ").") :
+
+                    fenetre.blit(selectPawnImage, (mouseX * 50, mouseY * 50));
+                                                       
+                pygame.display.flip();
+
+            if (event.type == pygame.MOUSEBUTTONDOWN) :
+
+                for sol in prolog.query("pawn(" + (str)(mouseX) + ", " + str(mouseY) + ", " + playerColor + ").") :
+
+                    pawn[0] = mouseX;
+                    pawn[1] = mouseY;
+
+                    pawnSelected = 1;
+
+    return pawn;
+
+
+
+def selectAction(pawn):
+
+    action = ["", 0, 0];
+
+    actionSelected = 0;
+
+    actionType = ["'Move'", "'Eat'"];
+    allowedDirectionStep = [0, 0, 0, 0];
+
+    iActionType = 0;
+
+    while (iActionType < 2) :
+
+        for sol in prolog.query("isGoodAction(" + actionType[iActionType] + ", pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + (str)(pawn[2]) + "), Direction).") :
+
+            iAllowedDirection = 0;
+
+            while (iAllowedDirection < 4) :
+
+                if ((int)(sol["Direction"]) == iAllowedDirection):
+
+                    allowedDirectionStep[iAllowedDirection] = iActionType + 1;
+
+                iAllowedDirection = iAllowedDirection + 1;
+
+        iActionType = iActionType + 1;
+
+    while (actionSelected == 0) :
+
+        for event in pygame.event.get() :
+
+            if (event.type == pygame.MOUSEMOTION) :
+
+                display();
+
+                mouseX = pygame.mouse.get_pos()[0] / 50;
+                mouseY = pygame.mouse.get_pos()[1] / 50;
+
+                if (allowedDirectionStep[0] != "" and mouseX == pawn[0] - allowedDirectionStep[0] and mouseY == pawn[1] - allowedDirectionStep[0]) :
+
+                    fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
+
+                elif (allowedDirectionStep[1] != "" and mouseX == pawn[0] + allowedDirectionStep[1] and mouseY == pawn[1] - allowedDirectionStep[1]) :
+
+                    fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
+
+                elif (allowedDirectionStep[2] != "" and mouseX == pawn[0] - allowedDirectionStep[2] and mouseY == pawn[1] + allowedDirectionStep[2]) :
+
+                    fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
+
+                elif (allowedDirectionStep[3] != "" and mouseX == pawn[0] + allowedDirectionStep[3] and mouseY == pawn[1] + allowedDirectionStep[3]) :
+
+                    fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
+
+                pygame.display.flip();
+
+            if (event.type == pygame.MOUSEBUTTONDOWN) :
+
+                if (allowedDirectionStep[0] != "" and mouseX == pawn[0] - allowedDirectionStep[0] and mouseY == pawn[1] - allowedDirectionStep[0]) :
+
+                    action[0] = allowedDirectionStep[0];
+                    action[1] = pawn[0] - allowedDirectionStep[0];
+                    action[2] = pawn[1] - allowedDirectionStep[0];
+
+                    actionSelected = 1;
+                    
+                elif (allowedDirectionStep[1] != "" and mouseX == pawn[0] + allowedDirectionStep[1] and mouseY == pawn[1] - allowedDirectionStep[1]) :
+
+                    action[0] = allowedDirectionStep[1];
+                    action[1] = pawn[0] + allowedDirectionStep[1];
+                    action[2] = pawn[1] - allowedDirectionStep[1];
+
+                    actionSelected = 1;
+                       
+                elif (allowedDirectionStep[2] != "" and mouseX == pawn[0] - allowedDirectionStep[2] and mouseY == pawn[1] + allowedDirectionStep[2]) :
+
+                    action[0] = allowedDirectionStep[2];
+                    action[1] = pawn[0] - allowedDirectionStep[2];
+                    action[2] = pawn[1] + allowedDirectionStep[2];
+
+                    actionSelected = 1;
+                       
+                elif (allowedDirectionStep[3] != "" and mouseX == pawn[0] + allowedDirectionStep[3] and mouseY == pawn[1] + allowedDirectionStep[3]) :
+
+                    action[0] = allowedDirectionStep[3];
+                    action[1] = pawn[0] + allowedDirectionStep[3];
+                    action[2] = pawn[1] + allowedDirectionStep[3];
+
+                    actionSelected = 1;
+
+    if (action[0] == 1) :
+
+        action[0] = "'Move'";
+
+    else :
+
+        action[0] = "'Eat'";
+
+    return action;
+
+
+
 pygame.init();
 
-fenetre = pygame.display.set_mode((500, 500), RESIZABLE);
+global fenetre;
 
-back = pygame.image.load("Back.png").convert();
-blackPawn = pygame.image.load("BlackPawn.png").convert_alpha();
-whitePawn = pygame.image.load("WhitePawn.png").convert_alpha();
+global backImage;
+global blackPawnImage;
+global whitePawnImage;
+global selectPawnImage;
+global selectDestImage;
 
-fenetre.blit(back, (0,0));
+fenetre = pygame.display.set_mode((500, 500));
 
-pygame.display.flip();
+backImage = pygame.image.load("Back.png").convert();
+blackPawnImage = pygame.image.load("BlackPawn.png").convert_alpha();
+whitePawnImage = pygame.image.load("WhitePawn.png").convert_alpha();
+selectPawnImage = pygame.image.load("SelectPawn.png").convert_alpha();
+selectDestImage = pygame.image.load("SelectDest.png").convert_alpha();
 
 
 
@@ -50,26 +190,36 @@ prolog.consult("damev1.1.pl");
 
 list(prolog.query("init."));
 
-display(fenetre, back, blackPawn, whitePawn);
+display();
+pygame.display.flip();
+
+players = [["w", "Human"], ["b", "AI"]];
+currentPlayer = 0;
 
 running = 1;
 
-nextTurn = 0;
-player = 'w';
-
 while (running == 1) :
 
-    if (nextTurn == 1) :
+    if (players[currentPlayer][1] == "Human") :
 
-        list(prolog.query("play(" + player + ")."));
+        pawn = selectPawn(players[currentPlayer][0]);
 
-        display(fenetre, back, blackPawn, whitePawn);
+        action = selectAction(pawn);
 
-        nextTurn = 0;
-        if (player == 'w') :
-            player = 'b';
-        else :
-            player = 'w';
+        list(prolog.query("applyAction(action(" + action[0] + ", " + (str)(action[1]) + ", " + (str)(action[2]) + "), " +
+                                            "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
+                
+    else :
+
+        list(prolog.query("play(" + players[currentPlayer][0] + ")."));
+
+    display();
+    pygame.display.flip();
+
+    if (currentPlayer == 0) :
+        currentPlayer = 1;
+    else :
+        currentPlayer = 0;
     
     for event in pygame.event.get() :
 
@@ -79,10 +229,6 @@ while (running == 1) :
         
         if (event.type == pygame.KEYDOWN) :
 
-            if (event.key == pygame.K_RETURN) :
-
-                nextTurn = 1;
-            
             if (event.key == pygame.K_ESCAPE) :
 
                 running = 0;
