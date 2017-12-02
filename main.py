@@ -77,15 +77,15 @@ def selectAction(pawn):
 
         for sol in prolog.query("isGoodAction(" + actionType[iActionType] + ", pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + (str)(pawn[2]) + "), Direction).") :
 
-            iAllowedDirection = 0;
+            iAllowedDirectionStep = 0;
 
-            while (iAllowedDirection < 4) :
+            while (iAllowedDirectionStep < 4) :
 
-                if ((int)(sol["Direction"]) == iAllowedDirection):
+                if ((int)(sol["Direction"]) == iAllowedDirectionStep):
 
-                    allowedDirectionStep[iAllowedDirection] = iActionType + 1;
+                    allowedDirectionStep[iAllowedDirectionStep] = iActionType + 1;
 
-                iAllowedDirection = iAllowedDirection + 1;
+                iAllowedDirectionStep = iAllowedDirectionStep + 1;
 
         iActionType = iActionType + 1;
 
@@ -201,7 +201,7 @@ list(prolog.query("init."));
 display();
 pygame.display.flip();
 
-players = [["w", "Human"], ["b", "Human"]];
+players = [["w", "Human"], ["b", "AI"]];
 currentPlayer = 0;
 
 running = 1;
@@ -222,7 +222,7 @@ while (running == 1) :
             pygame.display.flip();
 
         list(prolog.query("applyAction(action(" + action[0] + ", " + (str)(action[1]) + ", " + (str)(action[2]) + "), " +
-                                            "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
+                                      "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
                 
     else :
 
@@ -232,8 +232,11 @@ while (running == 1) :
     pygame.display.flip();
 
     if (currentPlayer == 0) :
+        
         currentPlayer = 1;
+        
     else :
+        
         currentPlayer = 0;
     
     for event in pygame.event.get() :
