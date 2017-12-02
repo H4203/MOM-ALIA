@@ -64,7 +64,7 @@ def selectPawn(playerColor) :
 
 def selectAction(pawn):
 
-    action = ["", 0, 0];
+    action = ["", -1, -1];
 
     actionSelected = 0;
 
@@ -93,9 +93,17 @@ def selectAction(pawn):
 
         for event in pygame.event.get() :
 
-            if (event.type == pygame.MOUSEMOTION) :
+            display();
 
-                display();
+            fenetre.blit(selectPawnImage, (pawn[0] * 50, pawn[1] * 50));
+
+            if (event.type == pygame.KEYDOWN) :
+
+                if (event.key == pygame.K_ESCAPE) :
+
+                    actionSelected = -1;
+
+            if (event.type == pygame.MOUSEMOTION) :
 
                 mouseX = pygame.mouse.get_pos()[0] / 50;
                 mouseY = pygame.mouse.get_pos()[1] / 50;
@@ -193,7 +201,7 @@ list(prolog.query("init."));
 display();
 pygame.display.flip();
 
-players = [["w", "Human"], ["b", "AI"]];
+players = [["w", "Human"], ["b", "Human"]];
 currentPlayer = 0;
 
 running = 1;
@@ -202,9 +210,16 @@ while (running == 1) :
 
     if (players[currentPlayer][1] == "Human") :
 
-        pawn = selectPawn(players[currentPlayer][0]);
+        action = ["", -1, -1];
 
-        action = selectAction(pawn);
+        while (action[1] == -1) :
+
+            pawn = selectPawn(players[currentPlayer][0]);
+
+            action = selectAction(pawn);
+
+            display();
+            pygame.display.flip();
 
         list(prolog.query("applyAction(action(" + action[0] + ", " + (str)(action[1]) + ", " + (str)(action[2]) + "), " +
                                             "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
