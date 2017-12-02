@@ -8,7 +8,7 @@ import time
 
 
 
-def printPawns(fenetre, back, blackPawn, whitePawn) :
+def display(fenetre, back, blackPawn, whitePawn) :
 
     fenetre.blit(back, (0,0));
 
@@ -50,27 +50,42 @@ prolog.consult("damev1.1.pl");
 
 list(prolog.query("init."));
 
+display(fenetre, back, blackPawn, whitePawn);
+
 running = 1;
 
-while running:
+nextTurn = 0;
+player = 'w';
 
-    list(prolog.query("play('b')."));
+while (running == 1) :
 
-    printPawns(fenetre, back, blackPawn, whitePawn);
+    if (nextTurn == 1) :
 
-    time.sleep(0.5);
+        list(prolog.query("play(" + player + ")."));
 
-    list(prolog.query("play('w')."));
+        display(fenetre, back, blackPawn, whitePawn);
 
-    printPawns(fenetre, back, blackPawn, whitePawn);
-
-    time.sleep(0.5);
+        nextTurn = 0;
+        if (player == 'w') :
+            player = 'b';
+        else :
+            player = 'w';
     
-    for event in pygame.event.get():
+    for event in pygame.event.get() :
+
+        if (event.type == pygame.QUIT) :
+
+            running = 0;
         
-        if event.type == pygame.QUIT:
+        if (event.type == pygame.KEYDOWN) :
+
+            if (event.key == pygame.K_RETURN) :
+
+                nextTurn = 1;
             
-            running = False
+            if (event.key == pygame.K_ESCAPE) :
+
+                running = 0;
 
 pygame.display.quit()
 
