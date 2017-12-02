@@ -1,5 +1,6 @@
 :- dynamic pawn/3.
 :- dynamic action/3.
+:- dynamic aiLevel/2.
 
 noWhitePawn :- not(pawn(_,_,'w')).
 noWhiteQueen :- not(pawn(_,_,'wq')).
@@ -96,13 +97,16 @@ play(Player,1) :- write('New turn for:'), writeln(Player),
     ai(1,Player,Pawn,ActionList),
     applyActions(ActionList,Pawn),
     nextPlayer(Player,NextPlayer),
-    play(NextPlayer,2).
-play(Player,2) :- write('New turn for:'), writeln(Player),
+    aiLevel(L,NextPlayer),
+    play(NextPlayer,L).
+play(Player,L) :- write('New turn for:'), writeln(Player),
+    L > 1,
     displayBoard,
-    ai(2,Player,_,NewBoard),
+    ai(L,Player,_,NewBoard),
     applyNewBoard(NewBoard),
     nextPlayer(Player,NextPlayer),
-    play(NextPlayer,1).
+    aiLevel(L,NextPlayer),
+    play(NextPlayer,L).
 init :-
     retractall(pawn(_,_,_)),retractall(action(_,_,_)),
     assert(pawn(1,0,'b')), assert(pawn(3,0,'b')), assert(pawn(5,0,'b')), assert(pawn(7,0,'b')), assert(pawn(9,0,'b')),
@@ -114,11 +118,12 @@ init :-
     assert(pawn(0,7,'w')), assert(pawn(2,7,'w')), assert(pawn(4,7,'w')), assert(pawn(6,7,'w')), assert(pawn(8,7,'w')),
     assert(pawn(1,8,'w')), assert(pawn(3,8,'w')), assert(pawn(5,8,'w')), assert(pawn(7,8,'w')), assert(pawn(9,8,'w')),
     assert(pawn(0,9,'w')), assert(pawn(2,9,'w')), assert(pawn(4,9,'w')), assert(pawn(6,9,'w')), assert(pawn(8,9,'w')),
-   play('b',2).
+    aiLevel(L,'b'),
+    play('b',L).
 
 %-------------------------------
-aiLevel(1,'w').
-aiLevel(1,'b').
+setAiLevel(L,'w') :- assert(aiLevel(L,'w')).
+setAiLevel(L,'b') :- assert(aiLevel(L,'b')).
 %-------------------------------
 isSameGroup('w','w').
 isSameGroup('wq','w').
@@ -246,6 +251,16 @@ ai(1,Player,pawn(X,Y,Role),ActionList):-writeln(''),repeat,
 ai(2,Player,_,NewBoard) :-
     createBoard(Board),
     minimax([Player,'Playing',Board], [Player,_,NewBoard], _, 0,1)
+    .
+%do not choose a pawn it just do the best move
+ai(3,Player,_,NewBoard) :-
+    createBoard(Board),
+    minimax([Player,'Playing',Board], [Player,_,NewBoard], _, 0,2)
+    .
+%do not choose a pawn it just do the best move
+ai(4,Player,_,NewBoard) :-
+    createBoard(Board),
+    minimax([Player,'Playing',Board], [Player,_,NewBoard], _, 0,3)
     .
 
 % create a list of all pawn on the field
