@@ -8,18 +8,18 @@ noBlackQueen :- not(pawn(_,_,'bq')).
 
 
 gameover :- noWhitePawn,noWhiteQueen,
-     writeln(''), writeln('Les noirs ont gagné'),displayBoard.
+     write(''), write('Les noirs ont gagné'),displayBoard.
 gameover :- noBlackPawn, noBlackQueen,
-     writeln(''),writeln('Les blancs ont gagné'),displayBoard.
+     write(''),write('Les blancs ont gagné'),displayBoard.
 
-printVal(Y,X) :- pawn(X,Y,Val), write('\t'), write(Val), write('\t'),!.  %, var(Val)
-printVal(_,_) :- write('\t_\t'). %,nonvar(Val)
+printVal(Y,X) :- pawn(X,Y,Val), write(' '), write(Val), write(' '),!.  %, var(Val)
+printVal(_,_) :- write(' - '). %,nonvar(Val)
 
 displayBoard :-
      findall(_, partialDisplayBoard, _).
 
 partialDisplayBoard :-
-    between(0, 9, I), writeln(''),
+    between(0, 9, I), write(''),
     between(0, 9, J),
     printVal(I,J).
 	
@@ -72,7 +72,7 @@ applyAction(Action, Pawn) :-
     Action = action(Type, XDest, YDest),
     Pawn = _,
 
-    (Type == 'Eat', write(Type), write(XDest), writeln(YDest), writeln('test2'), applyEat(Action, Pawn)),
+    (Type == 'Eat', write(Type), write(XDest), write(YDest), write('test2'), applyEat(Action, Pawn)),
 
     applyMove(Action, Pawn),
 
@@ -88,7 +88,7 @@ applyActions(Actions, Pawn) :-
     applyActions(Tail, Pawn).
 
 %play(_) :- gameover.
-play(Player) :- write('New turn for:'), writeln(Player),
+play(Player) :- write('New turn for:'), write(Player),
     displayBoard,
     aiLevel(Niveau, Player),
     ai(Niveau,Player,Pawn,ActionList),
@@ -163,15 +163,12 @@ choosePawn(Player,pawn(X,Y,Role)):-
     not(pawn(NewX1,NewY1,_)), write(NewX1),write(NewY1).
 
 chooseAction(pawn(X,Y,Role),ActionList):-
-%    Direction is random(4), write('Direction'), writeln(Direction),
     isGoodDirection(Direction,Role),
-%    Random is random(2),write('Random'),
     between(0,1,Random),
     numberToType(Type,Random),
     isGoodAction(Type,pawn(X,Y,Role),Direction),
-    createAction(Type,X,Y,Role,Direction,ActionList), writeln('createAction done')    ,
-
-    !.
+    createAction(Type,X,Y,Role,Direction,ActionList),
+	!.
 
 
 createAction('Eat',X,Y,Role,Direction,ActionList):-
@@ -231,10 +228,10 @@ cantEatMore(AlreadyEaten, X, Y, Role, ActionList) :-
     !.
 
 
-ai(1,Player,pawn(X,Y,Role),ActionList):-writeln(''),repeat,
+ai(1,Player,pawn(X,Y,Role),ActionList):-write(''),repeat,
     choosePawn(Player,pawn(X,Y,Role)),
     chooseAction(pawn(X,Y,Role),ActionList),
-    write('I Choose '),write(X),write(Y),writeln(Role),!.
+    write('I Choose '),write(X),write(Y),write(Role),!.
 
 % for testing purpose
 initfield :-
@@ -248,4 +245,3 @@ initfield :-
     assert(pawn(0,7,'w')), assert(pawn(2,7,'w')), assert(pawn(4,7,'w')), assert(pawn(6,7,'w')), assert(pawn(8,7,'w')),
     assert(pawn(1,8,'w')), assert(pawn(3,8,'w')), assert(pawn(5,8,'w')), assert(pawn(7,8,'w')), assert(pawn(9,8,'w')),
     assert(pawn(0,9,'w')), assert(pawn(2,9,'w')), assert(pawn(4,9,'w')), assert(pawn(6,9,'w')), assert(pawn(8,9,'w')).
-

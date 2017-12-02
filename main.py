@@ -1,34 +1,30 @@
 
-from pyswip import Prolog
+from pyswip import *
 
 import pygame
 from pygame.locals import *
+
+import time
 
 
 
 def printPawns(fenetre, back, blackPawn, whitePawn) :
 
-    #fenetre.blit(back, (0,0));
+    fenetre.blit(back, (0,0));
 
     list(prolog.query("pawn(X,Y,Player)."));
 
-    print("Start");
-
     for sol in prolog.query("pawn(X,Y,Player)."):
 
-        print ("X : " + (str)(sol["X"]) + ", Y : " + (str)(sol["Y"]) + ",  Player : " + str(sol["Player"]));
+        if (sol["Player"] == 'w'):
 
-        #if (sol["Player"] == 'w'):
+            fenetre.blit(whitePawn, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50));
 
-            #fenetre.blit(whitePawn, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50));
+        elif (sol["Player"] == 'b'):
 
-        #elif (sol["Player"] == 'b'):
+            fenetre.blit(blackPawn, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50)); 
 
-            #fenetre.blit(blackPawn, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50)); 
-
-    print("End");
-
-    #pygame.display.flip();
+    pygame.display.flip();
 
     return;
 
@@ -48,28 +44,43 @@ pygame.display.flip();
 
 
 
-
 prolog = Prolog();
 
 prolog.consult("damev1.1.pl");
 
 list(prolog.query("init."));
 
-printPawns(fenetre, back, blackPawn, whitePawn);
+running = 1;
 
-#list(prolog.query("applyMove(action('Move', 5, 5), pawn(1, 0, 'b'))."));
+while running:
 
-a = list(prolog.query("ai(1, 'b', pawn(8, 3, 'b'), A)"));
+    list(prolog.query("play('b')."));
 
-for sol in a:
+    printPawns(fenetre, back, blackPawn, whitePawn);
 
-    print sol["A"]
+    time.sleep(0.5);
 
-printPawns(fenetre, back, blackPawn, whitePawn);
+    list(prolog.query("play('w')."));
 
-#list(prolog.query("applyMove(action('Move', 5, 6), pawn(5, 5, 'b'))."));
+    printPawns(fenetre, back, blackPawn, whitePawn);
 
-#printPawns(fenetre, back, blackPawn, whitePawn);
+    time.sleep(0.5);
+    
+    for event in pygame.event.get():
+        
+        if event.type == pygame.QUIT:
+            
+            running = False
+
+pygame.display.quit()
+
+pygame.quit()
+
+    
+
+
+
+
 
 
 
