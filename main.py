@@ -86,8 +86,8 @@ def selectAction(pawn, onlyEatAllowed):
 
         for sol in prolog.query("isGoodAction(" + actionType[iActionType] + ", pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + (str)(pawn[2]) + "), Direction).") :
 
-            if ((((int)(sol["Direction"]) == 0 or (int)(sol["Direction"]) == 1) and pawn[2] == 'w') or
-                (((int)(sol["Direction"]) == 2 or (int)(sol["Direction"]) == 3) and pawn[2] == 'b')): 
+            if ((((int)(sol["Direction"]) == 0 or (int)(sol["Direction"]) == 1) and pawn[2] == "'w'") or
+                (((int)(sol["Direction"]) == 2 or (int)(sol["Direction"]) == 3) and pawn[2] == "'b'")): 
 
                 iAllowedDirectionStep = 0;
 
@@ -220,14 +220,14 @@ selectDestImage = pygame.image.load("SelectDest.png").convert_alpha();
 
 prolog = Prolog();
 
-prolog.consult("damev1.1.pl");
+prolog.consult("damev1.2.Graphique.pl");
 
 list(prolog.query("init."));
 
 display();
 pygame.display.flip();
 
-players = [["w", "Human"], ["b", "Human"]];
+players = [["'w'", "Human"], ["'b'", "1"]];
 currentPlayer = 0;
 
 running = 1;
@@ -266,7 +266,7 @@ while (running == 1) :
                 
     else :
 
-        list(prolog.query("play(" + players[currentPlayer][0] + ")."));
+        list(prolog.query("play(" + players[currentPlayer][0] + ", " + players[currentPlayer][1] + ")."));
 
     display();
     pygame.display.flip();
