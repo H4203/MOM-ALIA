@@ -220,14 +220,14 @@ selectDestImage = pygame.image.load("SelectDest.png").convert_alpha();
 
 prolog = Prolog();
 
-prolog.consult("damev1.2.Graphique.pl");
+prolog.consult("damev1.3.Graphique.pl");
 
 list(prolog.query("init."));
 
 display();
 pygame.display.flip();
 
-players = [["'w'", "Human"], ["'b'", "1"]];
+players = [["'w'", "Human"], ["'b'", "2"]];
 currentPlayer = 0;
 
 running = 1;
@@ -267,11 +267,6 @@ while (running == 1) :
     else :
 
         list(prolog.query("play(" + players[currentPlayer][0] + ", " + players[currentPlayer][1] + ")."));
-
-        for sol in prolog.query("action(A, B, C).") :
-
-            print sol
-
 
     display();
     pygame.display.flip();
