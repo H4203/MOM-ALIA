@@ -18,9 +18,17 @@ def display() :
 
             fenetre.blit(whitePawnImage, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50));
 
+        if (sol["Player"] == 'wq'):
+
+            fenetre.blit(whiteQueenImage, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50));
+
         elif (sol["Player"] == 'b'):
 
-            fenetre.blit(blackPawnImage, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50)); 
+            fenetre.blit(blackPawnImage, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50));
+
+        elif (sol["Player"] == 'bq'):
+
+            fenetre.blit(blackQueenImage, ((int)(sol["X"]) * 50, (int)(sol["Y"]) * 50)); 
 
     return;
 
@@ -46,20 +54,25 @@ def selectPawn(playerColor) :
 
                 display();
 
-                for sol in prolog.query("pawn(" + (str)(mouseX) + ", " + str(mouseY) + ", " + playerColor + ").") :
+                for sol in prolog.query("pawn(" + (str)(mouseX) + ", " + str(mouseY) + ", Role).") :
 
-                    fenetre.blit(selectPawnImage, (mouseX * 50, mouseY * 50));
+                    if (sol["Role"] == playerColor or sol["Role"] == playerColor + "q"):
+
+                        fenetre.blit(selectPawnImage, (mouseX * 50, mouseY * 50));
                                                        
-                pygame.display.flip();
+                        pygame.display.flip();
 
             if (event.type == pygame.MOUSEBUTTONDOWN) :
 
-                for sol in prolog.query("pawn(" + (str)(mouseX) + ", " + str(mouseY) + ", " + playerColor + ").") :
+                for sol in prolog.query("pawn(" + (str)(mouseX) + ", " + str(mouseY) + ", Role).") :
 
-                    pawn[0] = mouseX;
-                    pawn[1] = mouseY;
+                    if (sol["Role"] == playerColor or sol["Role"] == playerColor + "q"):
 
-                    pawnSelected = 1;
+                        pawn[0] = mouseX;
+                        pawn[1] = mouseY;
+                        pawn[2] = sol["Role"];
+
+                        pawnSelected = 1;
 
     return pawn;
 
@@ -86,8 +99,9 @@ def selectAction(pawn, onlyEatAllowed):
 
         for sol in prolog.query("isGoodAction(" + actionType[iActionType] + ", pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + (str)(pawn[2]) + "), Direction).") :
 
-            if ((((int)(sol["Direction"]) == 0 or (int)(sol["Direction"]) == 1) and pawn[2] == "'w'") or
-                (((int)(sol["Direction"]) == 2 or (int)(sol["Direction"]) == 3) and pawn[2] == "'b'")): 
+            if (iActionType == 1 or pawn[2] == "wq" or pawn[2] == "bq" or
+                (((int)(sol["Direction"]) == 0 or (int)(sol["Direction"]) == 1) and pawn[2] == "w") or
+                (((int)(sol["Direction"]) == 2 or (int)(sol["Direction"]) == 3) and pawn[2] == "b")) : 
 
                 iAllowedDirectionStep = 0;
 
@@ -204,7 +218,9 @@ global fenetre;
 
 global backImage;
 global blackPawnImage;
+global blackQueenImage;
 global whitePawnImage;
+global whiteQueenImage;
 global selectPawnImage;
 global selectDestImage;
 
@@ -212,7 +228,9 @@ fenetre = pygame.display.set_mode((500, 500));
 
 backImage = pygame.image.load("Back.png").convert();
 blackPawnImage = pygame.image.load("BlackPawn.png").convert_alpha();
+blackQueenImage = pygame.image.load("BlackQueen.png").convert_alpha();
 whitePawnImage = pygame.image.load("WhitePawn.png").convert_alpha();
+whiteQueenImage = pygame.image.load("WhiteQueen.png").convert_alpha();
 selectPawnImage = pygame.image.load("SelectPawn.png").convert_alpha();
 selectDestImage = pygame.image.load("SelectDest.png").convert_alpha();
 
@@ -227,7 +245,7 @@ list(prolog.query("init."));
 display();
 pygame.display.flip();
 
-players = [["'w'", "Human"], ["'b'", "2"]];
+players = [["w", "Human"], ["b", "Human"]];
 currentPlayer = 0;
 
 running = 1;
