@@ -380,16 +380,19 @@ eatMoreMinMax(Board,NewBoard,X,Y,Role) :-
 
 minimax(Pos, BestNextPos, Val, Deep, EndDeep) :-                     % Pos has successors
     Deep \== EndDeep,
+    % writeln('je test peut etre ca'), %debug
     bagof(NextPos, move(Pos, NextPos), NextPosList),
     best(NextPosList, BestNextPos, Val, Deep, EndDeep),
     !.
-minimax(Pos, BestNextPos, Val, Deep, EndDeep) :-                     % Pos has successors
+minimax(Pos, _, Val, Deep, EndDeep) :-                     % Pos has successors
+    % writeln('je test ca'), %debug
     Deep \== EndDeep,
-    not(bagof(NextPos, move(Pos, NextPos), NextPosList)),
-    utility(Pos, Val)
+    not(bagof(NextPos, move(Pos, NextPos), _)),
+    utility(Pos, Val),
     !.
 
 minimax(Pos, _, Val, EndDeep, EndDeep) :-                     % Pos has no successors
+    % writeln('je test au moins ca'), % debug
     utility(Pos, Val)
     .
 
@@ -544,3 +547,10 @@ initfield2 :-
     assert(pawn(3,4,'b')),
 
     assert(pawn(2,5,'w')),assert(pawn(2,7,'w')), assert(pawn(1,6,'w')).
+
+    initfield3 :-
+        retractall(pawn(_,_,_)),retractall(action(_,_,_)),
+        assert(pawn(3,4,'b')),
+
+        assert(pawn(3,0,'wq')),assert(pawn(7,2,'w')), assert(pawn(6,5,'w')),assert(pawn(5,6,'w')),assert(pawn(1,8,'w')),assert(pawn(0,9,'w')),
+        assert(pawn(2,9,'w')),assert(pawn(9,8,'w')).
