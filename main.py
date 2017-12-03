@@ -268,6 +268,11 @@ while (running == 1) :
 
         list(prolog.query("play(" + players[currentPlayer][0] + ", " + players[currentPlayer][1] + ")."));
 
+        for sol in prolog.query("action(A, B, C).") :
+
+            print sol
+
+
     display();
     pygame.display.flip();
 

@@ -172,8 +172,7 @@ chooseAction(pawn(X,Y,Role),ActionList):-
     between(0,1,Random),
     numberToType(Type,Random),
     isGoodAction(Type,pawn(X,Y,Role),Direction),
-    createAction(Type,X,Y,Role,Direction,ActionList), write('createAction done')    ,
-
+    createAction(Type,X,Y,Role,Direction,ActionList),
     !.
 
 
