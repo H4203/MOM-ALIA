@@ -1,5 +1,6 @@
 :- dynamic pawn/3.
 :- dynamic action/3.
+:- dynamic aiLevel/2.
 
 noWhitePawn :- not(pawn(_,_,'w')).
 noWhiteQueen :- not(pawn(_,_,'wq')).
@@ -8,9 +9,9 @@ noBlackQueen :- not(pawn(_,_,'bq')).
 
 
 gameover :- noWhitePawn,noWhiteQueen,
-     write(''), write('Les noirs ont gagné'),displayBoard.
+     write(''), write('Les noirs ont gagne'),displayBoard.
 gameover :- noBlackPawn, noBlackQueen,
-     write(''),write('Les blancs ont gagné'),displayBoard.
+     write(''),write('Les blancs ont gagne'),displayBoard.
 
 printVal(Y,X) :- pawn(X,Y,Val), write('\t'), write(Val), write('\t'),!.  %, var(Val)
 printVal(_,_) :- write('\t_\t'). %,nonvar(Val)
@@ -95,9 +96,10 @@ play(Player,1) :- write('New turn for:'), write(Player),
     displayBoard,
     ai(1,Player,Pawn,ActionList),
     applyActions(ActionList,Pawn).
-play(Player,2) :- write('New turn for:'), write(Player),
+play(Player,L) :- write('New turn for:'), write(Player),
+    L > 1,
     displayBoard,
-    ai(2,Player,_,NewBoard),
+    ai(L,Player,_,NewBoard),
     applyNewBoard(NewBoard).
 init :-
     retractall(pawn(_,_,_)),retractall(action(_,_,_)),
@@ -112,8 +114,8 @@ init :-
     assert(pawn(0,9,'w')), assert(pawn(2,9,'w')), assert(pawn(4,9,'w')), assert(pawn(6,9,'w')), assert(pawn(8,9,'w')).
 
 %-------------------------------
-aiLevel(1,'w').
-aiLevel(1,'b').
+setAiLevel(L,'w') :- retractall(aiLevel(_,'w')),assert(aiLevel(L,'w')).
+setAiLevel(L,'b') :- retractall(aiLevel(_,'b')),assert(aiLevel(L,'b')).
 %-------------------------------
 isSameGroup('w','w').
 isSameGroup('wq','w').
@@ -127,7 +129,7 @@ isSameGroup('bq','bq').
 
 %-------------------------------
 
-% direction 0:up-left 1:up-right 2:down-left 3:down-right
+% direction 0:up-left 1:up-right 2:down-left 3:down-right only used when moving not eating
 isGoodDirection(0,'w').
 isGoodDirection(1,'w').
 isGoodDirection(2,'b').
@@ -172,7 +174,8 @@ chooseAction(pawn(X,Y,Role),ActionList):-
     between(0,1,Random),
     numberToType(Type,Random),
     isGoodAction(Type,pawn(X,Y,Role),Direction),
-    createAction(Type,X,Y,Role,Direction,ActionList),
+    createAction(Type,X,Y,Role,Direction,ActionList), write('createAction done')    ,
+
     !.
 
 
@@ -239,8 +242,24 @@ ai(1,Player,pawn(X,Y,Role),ActionList):-write(''),repeat,
 %do not choose a pawn it just do the best move
 ai(2,Player,_,NewBoard) :-
     createBoard(Board),
-    minimax([Player,'Playing',Board], [Player,_,NewBoard], _, 0,1)
+    minimax([Player,'Playing',Board], [_,_,NewBoard], _, 0,2)
     .
+%do not choose a pawn it just do the best move
+ai(3,Player,_,NewBoard) :-
+    createBoard(Board),
+    minimax([Player,'Playing',Board], [_,_,NewBoard], _, 0,4)
+    .
+%do not choose a pawn it just do the best move
+ai(4,Player,_,NewBoard) :-
+    createBoard(Board),
+    minimax([Player,'Playing',Board], [_,_,NewBoard], _, 0,6)
+    .
+    %do not choose a pawn it just do the best move
+ai(5,Player,_,NewBoard) :-
+    createBoard(Board),
+    minimax([Player,'Playing',Board], [_,_,NewBoard], _, 0,8)
+    .
+
 
 % create a list of all pawn on the field
 createBoard(Board) :-
@@ -253,24 +272,26 @@ addElementToBoard(Element) :-
     Element = [I,J,Role].
 
 % move eat
-move([CurrentPlayer,State,Board], [CurrentPlayer,State,NewBoard]) :-
+move([CurrentPlayer,State,Board], [NewPlayer,State,NewBoard]) :-
     between(0,9,I),
     between(0,9,J),
     between(0,3,Direction),
     nth0(_,Board,[I,J,Role]), isSameGroup(Role,CurrentPlayer),
-    isGoodDirection(Direction,Role),canEatMinMax(Direction,Board, I, J, Role),
-    eatMinMax(Board,NewBoard,Direction,I,J,Role)
+    canEatMinMax(Direction,Board, I, J, Role),
+    eatMinMax(Board,NewBoard,Direction,I,J,Role),
+    nextPlayer(CurrentPlayer,NewPlayer)
     .
 
 % move move
-move([CurrentPlayer,State,Board], [CurrentPlayer,State,NewBoard]) :-
+move([CurrentPlayer,State,Board], [NewPlayer,State,NewBoard]) :-
     not(bagof(_,mustEat(CurrentPlayer,Board),_)),
     between(0,9,I),
     between(0,9,J),
     between(0,3,Direction),
     nth0(_,Board,[I,J,Role]), isSameGroup(Role,CurrentPlayer),
     isGoodDirection(Direction,Role),canMoveMinMax(Direction, Board, I, J, Role),
-    moveMinMax(Board,NewBoard,Direction,I,J,Role)
+    moveMinMax(Board,NewBoard,Direction,I,J,Role),
+    nextPlayer(CurrentPlayer,NewPlayer)
     .
 %test if a pawn must be eaten or not
 mustEat(Player,Board) :-
@@ -278,7 +299,7 @@ mustEat(Player,Board) :-
     between(0,9,J),
     between(0,3,Direction),
     nth0(_,Board,[I,J,Role]), isSameGroup(Role,Player),
-    isGoodDirection(Direction,Role),canEatMinMax(Direction,Board, I, J, Role)
+    canEatMinMax(Direction,Board, I, J, Role)
     .
 % test
 canEatMinMax(Direction,Board, X, Y, Role) :-
@@ -353,34 +374,52 @@ eatMoreMinMax(Board,NewBoard,X,Y,Role) :-
 
 minimax(Pos, BestNextPos, Val, Deep, EndDeep) :-                     % Pos has successors
     Deep \== EndDeep,
+    % write('je test peut etre ca'), %debug
     bagof(NextPos, move(Pos, NextPos), NextPosList),
     best(NextPosList, BestNextPos, Val, Deep, EndDeep),
-    write('valeur retenue'),write(BestNextPos),write(Val),
+    % write('Pour l etat : '),write(Pos), write(' de profondeur'), write(Deep), %debug
+    % write('la meilleur valeur retenue est :'), write(Val), %debug
+    !.
+minimax(Pos, _, Val, Deep, EndDeep) :-                     % Pos has successors
+    % write('je test ca'), %debug
+    Deep \== EndDeep,
+    not(bagof(NextPos, move(Pos, NextPos), _)),
+    utility(Pos, Val),
+    % write('Pour l etat : '),write(Pos), %debug
+    % write('la valeur retenue est :'), write(Val), %debug
     !.
 
 minimax(Pos, _, Val, EndDeep, EndDeep) :-                     % Pos has no successors
-    utility(Pos, Val),
-    write(Pos),
-    write(Val)
+    % write('je test au moins ca'), % debug
+    utility(Pos, Val)
+    % write('Pour l etat : '),write(Pos), %debug
+    % write('la valeur retenue est :'), write(Val) %debug
     .
 
 best([Pos], Pos, Val, Deep, EndDeep) :-                                % There is no more position to compare
-    NewDeep is Deep +1,
+    NewDeep is (Deep +1),
     minimax(Pos, _, Val, NewDeep, EndDeep),
+    % write('Val'),write(Val), %debug
+    % write('Pour le premier etat : '),write(Pos), write(' de profondeur'), write(Deep), %debug
     !.
 
 best([Pos1 | PosList], BestPos, BestVal, Deep, EndDeep) :-             % There are other positions to compare
-    NewDeep is Deep +1,
+    NewDeep is (Deep +1),
     minimax(Pos1, _, Val1, NewDeep, EndDeep),
     best(PosList, Pos2, Val2, Deep, EndDeep),
-    betterOf(Pos1, Val1, Pos2, Val2, BestPos, BestVal,Deep).
+    % write('Pour l etat : '),write(Pos1), write(' de profondeur'), write(Deep), %debug
+    % write('Val1 '), write(Val1), write(' Val2 '), write(Val2), %debug
+    % write('Pos1 '), write(Pos1), write(' Pos2 '), write(Pos2), %debug
+    betterOf(Pos1, Val1, Pos2, Val2, BestPos, BestVal,Deep)
+    % write('Je sors de l etat : '),write(Pos1), write(' de profondeur'), write(Deep) %debug
+    .
 
 betterOf(Pos0, Val0, _, Val1, Pos0, Val0, Deep) :-   % Pos0 better than Pos1
-    min_to_move(Pos0,Deep),                         % MIN to move in Pos0
+    min_to_move(Pos0,Deep),                        % MIN to move in Pos0
     Val0 > Val1, !.                            % MAX prefers the greater value
 
 betterOf(Pos0, Val0, _, Val1, Pos0, Val0 , Deep) :-   % Pos0 better than Pos1
-    max_to_move(Pos0,Deep),                         % MAX to move in Pos0
+    max_to_move(Pos0,Deep),                        % MAX to move in Pos0
     Val0 < Val1, !.                            % MIN prefers the lesser value
 
 betterOf(_, _, Pos1, Val1, Pos1, Val1, _).        % Otherwise Pos1 better than Pos0
@@ -407,46 +446,55 @@ pawnValue('b', 'wq', -5).
 pawnValue('b', 'bq', 5).
 
 % board_weight(+pawn,+X,+Y,-value).
-boardWeight('w',_,0,5).
-boardWeight('w',_,1,4).
-boardWeight('w',_,2,3).
-boardWeight('w',_,3,2).
-boardWeight('w',_,6,2).
-boardWeight('w',_,7,3).
-boardWeight('w',_,8,4).
-boardWeight('w',_,9,5).
+boardWeight('w',0,_,5).
+boardWeight('w',1,_,4).
+boardWeight('w',2,_,3).
+boardWeight('w',3,_,2).
+boardWeight('w',6,_,2).
+boardWeight('w',7,_,3).
+boardWeight('w',8,_,4).
+boardWeight('w',9,_,5).
 boardWeight('w',_,_,1).
 
-boardWeight('b',_,0,5).
-boardWeight('b',_,1,4).
-boardWeight('b',_,2,3).
-boardWeight('b',_,3,2).
-boardWeight('b',_,6,2).
-boardWeight('b',_,7,3).
-boardWeight('b',_,8,4).
-boardWeight('b',_,9,5).
+boardWeight('b',0,_,5).
+boardWeight('b',1,_,4).
+boardWeight('b',2,_,3).
+boardWeight('b',3,_,2).
+boardWeight('b',6,_,2).
+boardWeight('b',7,_,3).
+boardWeight('b',8,_,4).
+boardWeight('b',9,_,5).
 boardWeight('b',_,_,1).
 
-boardWeight('bq',_,0,5).
-boardWeight('bq',_,1,4).
+boardWeight('bq',_,0,1).
+boardWeight('bq',_,1,2).
 boardWeight('bq',_,2,3).
-boardWeight('bq',_,3,2).
-boardWeight('bq',_,6,2).
+boardWeight('bq',_,3,4).
+boardWeight('bq',_,6,4).
 boardWeight('bq',_,7,3).
-boardWeight('bq',_,8,4).
-boardWeight('bq',_,9,5).
-boardWeight('bq',_,_,1).
+boardWeight('bq',_,8,2).
+boardWeight('bq',_,9,1).
+boardWeight('bq',5,5,5).
+boardWeight('bq',5,4,5).
+boardWeight('bq',4,5,5).
+boardWeight('bq',4,4,5).
+boardWeight('bq',_,4,4).
+boardWeight('bq',_,5,4).
 
-boardWeight('wq',_,0,5).
-boardWeight('wq',_,1,4).
+boardWeight('wq',_,0,1).
+boardWeight('wq',_,1,2).
 boardWeight('wq',_,2,3).
-boardWeight('wq',_,3,2).
-boardWeight('wq',_,6,2).
+boardWeight('wq',_,3,4).
+boardWeight('wq',_,6,4).
 boardWeight('wq',_,7,3).
-boardWeight('wq',_,8,4).
-boardWeight('wq',_,9,5).
-boardWeight('wq',_,_,1).
-
+boardWeight('wq',_,8,2).
+boardWeight('wq',_,9,1).
+boardWeight('wq',5,5,5).
+boardWeight('wq',5,5,5).
+boardWeight('wq',4,5,5).
+boardWeight('wq',4,4,5).
+boardWeight('wq',_,4,4).
+boardWeight('wq',_,5,4).
 boardWeight(_,_,_,1).
 
 % synonym : utility == evaluateBoard
@@ -461,26 +509,28 @@ utility(Pos,Val):-
 winBoard(['b',_,Board],1000) :-
      noWhitePawn(Board),noWhiteQueen(Board)
      .
-winBoard(['b',_,Board],-1000) :-
+winBoard(['b',_,Board],Val) :-
+    Val is ( 1000 * -1),
      noBlackPawn(Board),noBlackQueen(Board)
      .
-winBoard(['w',_,Board],-1000) :-
+winBoard(['w',_,Board],Val) :-
+     Val is ( 1000 * -1),
      noWhitePawn(Board),noWhiteQueen(Board)
      .
 winBoard(['w',_,Board],1000) :-
      noBlackPawn(Board),noBlackQueen(Board)
      .
 noWhitePawn(Board) :-
-     not(member([_,_,'w'],Board)).
+     not(bagof(_,member([_,_,'w'],Board),_)).
 
 noWhiteQueen(Board) :-
-     not(member([_,_,'wq'],Board)).
+     not(bagof(_,member([_,_,'wq'],Board),_)).
 
 noBlackPawn(Board) :-
-     not(member([_,_,'b'],Board)).
+     not(bagof(_,member([_,_,'b'],Board),_)).
 
 noBlackQueen(Board) :-
-     not(member([_,_,'bq'],Board)).
+     not(bagof(_,member([_,_,'bq'],Board),_)).
 
 evaluateBoard([Player,_,[[X,Y,Pawn]]],Val):-
 	pawnValue(Player,Pawn, PawnValue),
@@ -503,7 +553,6 @@ assertPawn( Board ) :-
     assert(pawn(X,Y,Role))
 	.
 
-
 % for testing purpose
 initfield :-
     retractall(pawn(_,_,_)),retractall(action(_,_,_)),
@@ -517,3 +566,9 @@ initfield2 :-
 
     assert(pawn(2,5,'w')),assert(pawn(2,7,'w')), assert(pawn(1,6,'w')).
 
+    initfield3 :-
+        retractall(pawn(_,_,_)),retractall(action(_,_,_)),
+        assert(pawn(3,4,'b')),
+
+        assert(pawn(3,0,'wq')),assert(pawn(7,2,'w')), assert(pawn(6,5,'w')),assert(pawn(5,6,'w')),assert(pawn(1,8,'w')),assert(pawn(0,9,'w')),
+        assert(pawn(2,9,'w')),assert(pawn(9,8,'w')).

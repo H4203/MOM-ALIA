@@ -123,6 +123,8 @@ def selectAction(pawn, onlyEatAllowed):
 
         iActionType = iActionType + 1;
 
+    print(allowedDirectionStep);
+
     if (onlyEatAllowed == 1 and eatPossible == 0):
 
         action[0] = "done";
@@ -250,27 +252,55 @@ selectDestImage = pygame.image.load("SelectDest.png").convert_alpha();
 
 prolog = Prolog();
 
-prolog.consult("damev1.3.Graphique.pl");
+prolog.consult("damev1.3.G.pl");
 
 list(prolog.query("init."));
 
 display();
 pygame.display.flip();
 
-players = [["w", "Human"], ["b", "Human"]];
+players = [["w", "1"], ["b", "1"]];
 currentPlayer = 0;
+
+i = 0;
+
+while (i < 2) :
+    
+    if (players[i][1] != "Human") :
+
+        list(prolog.query("assert(aiLevel(" + players[i][1] + ", " + players[i][0] + "))."));
+
+    i = i + 1;
+
+for sol in prolog.query("aiLevel(A, B).") :
+
+    print sol
 
 running = 1;
 
 while (running == 1) :
 
+    if (players[currentPlayer][0] == "w") :
+
+        print("White Turn");
+
+    else :
+
+        print("Black Turn");
+        
     if (players[currentPlayer][1] == "Human") :
+
+        print("Human Player");
 
         action = ["cancel", -1, -1];
 
         while (action[0] == "cancel") :
 
+            print("   Choosing Pawn ...");
+
             pawn = selectPawn(players[currentPlayer][0]);
+
+            print("   Choosing Action ...");
 
             action = selectAction(pawn, 0);
 
@@ -288,6 +318,8 @@ while (running == 1) :
 
                 while (action[0] != "done") :
 
+                    print("   Choosing Action ...");
+
                     action = selectAction(pawn, 1);
 
                     if (action[0] != "done") :
@@ -302,7 +334,17 @@ while (running == 1) :
                 
     else :
 
-        list(prolog.query("play(" + players[currentPlayer][0] + ", " + players[currentPlayer][1] + ")."));
+        print("AI Level " + players[currentPlayer][1] + " Player");
+
+        print("   Playing ...");
+
+        for sol in prolog.query("play(" + players[currentPlayer][0] + ", " + players[currentPlayer][1] + ").") :
+
+            print sol
+
+        print("DONE");
+
+        time.sleep(0.5);
 
     display();
     pygame.display.flip();
