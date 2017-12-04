@@ -36,12 +36,11 @@ def display() :
 
 def selectPawn(playerColor) :
 
-    pawn = [0, 0, playerColor];
-
-    pawnSelected = 0;
-
     display();
     pygame.display.flip();
+
+    pawn = [0, 0, playerColor];
+    pawnSelected = 0;
 
     while (pawnSelected == 0) :
 
@@ -80,12 +79,17 @@ def selectPawn(playerColor) :
 
 def selectAction(pawn, onlyEatAllowed):
 
-    action = ["", -1, -1];
+    display();
+    fenetre.blit(selectPawnImage, (pawn[0] * 50, pawn[1] * 50));
+    pygame.display.flip();
 
+    action = ["", -1, -1];
     actionSelected = 0;
 
     actionType = ["'Move'", "'Eat'"];
     allowedDirectionStep = [0, 0, 0, 0];
+
+    eatPossible = 0;
 
     if (onlyEatAllowed == 1):
 
@@ -111,16 +115,24 @@ def selectAction(pawn, onlyEatAllowed):
 
                         allowedDirectionStep[iAllowedDirectionStep] = iActionType + 1;
 
+                        if (onlyEatAllowed == 1 and iActionType == 1) :
+
+                            eatPossible = 1;    
+
                     iAllowedDirectionStep = iAllowedDirectionStep + 1;
 
         iActionType = iActionType + 1;
+
+    if (onlyEatAllowed == 1 and eatPossible == 0):
+
+        action[0] = "done";
+        actionSelected = 1;
 
     while (actionSelected == 0) :
 
         for event in pygame.event.get() :
 
             display();
-
             fenetre.blit(selectPawnImage, (pawn[0] * 50, pawn[1] * 50));
 
             if (event.type == pygame.KEYDOWN) :
@@ -267,6 +279,9 @@ while (running == 1) :
                 list(prolog.query("applyAction(action(" + action[0] + ", " + (str)(action[1]) + ", " + (str)(action[2]) + "), " +
                                               "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
 
+                display();
+                pygame.display.flip();
+
             if (action[0] == "'Eat'") :
 
                 pawn = [action[1], action[2], pawn[2]];
@@ -279,6 +294,9 @@ while (running == 1) :
 
                         list(prolog.query("applyAction(action(" + action[0] + ", " + (str)(action[1]) + ", " + (str)(action[2]) + "), " +
                                                       "pawn(" + (str)(pawn[0]) + ", " + (str)(pawn[1]) + ", " + pawn[2] + "))."));
+
+                        display();
+                        pygame.display.flip();
 
                         pawn = [action[1], action[2], pawn[2]];
                 
