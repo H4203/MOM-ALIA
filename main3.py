@@ -36,11 +36,12 @@ def display() :
 
 def selectPawn(playerColor) :
 
+    display();
+
+    pygame.display.flip();
+
     pawn = [0, 0, playerColor];
     pawnSelected = 0;
-
-    display();
-    pygame.display.flip();
 
     while (pawnSelected == 0) :
 
@@ -79,6 +80,12 @@ def selectPawn(playerColor) :
 
 def selectAction(pawn):
 
+    display();
+
+    fenetre.blit(selectPawnImage, (pawn[0] * 50, pawn[1] * 50));
+
+    pygame.display.flip();
+
     action = [0, 0, 0];
     actionSelected = 0;
 
@@ -99,6 +106,8 @@ def selectAction(pawn):
                 mouseY = pygame.mouse.get_pos()[1] / 50;
 
                 display();
+
+                fenetre.blit(selectPawnImage, (pawn[0] * 50, pawn[1] * 50));
 
                 fenetre.blit(selectDestImage, (mouseX * 50, mouseY * 50));
 
@@ -157,7 +166,7 @@ list(prolog.query("init."));
 display();
 pygame.display.flip();
 
-players = [["w", "Human"], ["b", "2"]];
+players = [["w", "Human"], ["b", "Human"]];
 currentPlayer = 0;
 
 running = 1;
