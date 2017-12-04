@@ -259,7 +259,7 @@ list(prolog.query("init."));
 display();
 pygame.display.flip();
 
-players = [["w", "1"], ["b", "1"]];
+players = [["w", "1"], ["b", "2"]];
 currentPlayer = 0;
 
 i = 0;
@@ -271,10 +271,6 @@ while (i < 2) :
         list(prolog.query("assert(aiLevel(" + players[i][1] + ", " + players[i][0] + "))."));
 
     i = i + 1;
-
-for sol in prolog.query("aiLevel(A, B).") :
-
-    print sol
 
 running = 1;
 
@@ -338,13 +334,9 @@ while (running == 1) :
 
         print("   Playing ...");
 
-        for sol in prolog.query("play(" + players[currentPlayer][0] + ", " + players[currentPlayer][1] + ").") :
+        list(prolog.query("play(" + players[currentPlayer][0] + ", " + players[currentPlayer][1] + ")."));
 
-            print sol
-
-        print("DONE");
-
-        time.sleep(0.5);
+        time.sleep(0.2);
 
     display();
     pygame.display.flip();

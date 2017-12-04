@@ -9,20 +9,12 @@ noBlackQueen :- not(pawn(_,_,'bq')).
 
 
 gameover :- noWhitePawn,noWhiteQueen,
-     write(''), write('Les noirs ont gagne'),displayBoard.
+     write(''), write('Les noirs ont gagne').
 gameover :- noBlackPawn, noBlackQueen,
-     write(''),write('Les blancs ont gagne'),displayBoard.
+     write(''),write('Les blancs ont gagne').
 
 printVal(Y,X) :- pawn(X,Y,Val), write('\t'), write(Val), write('\t'),!.  %, var(Val)
 printVal(_,_) :- write('\t_\t'). %,nonvar(Val)
-
-displayBoard :-
-     findall(_, partialDisplayBoard, _), write('').
-
-partialDisplayBoard :-
-    between(0, 9, I), write(''),
-    between(0, 9, J),
-    printVal(I,J).
 
 % do not delete needed to make applyEat work properly
 otherPlayer('b','w').
@@ -93,12 +85,10 @@ applyActions(Actions, Pawn) :-
 
 play(_,_) :- gameover.
 play(Player,1) :- write('New turn for:'), write(Player),
-    displayBoard,
     ai(1,Player,Pawn,ActionList),
     applyActions(ActionList,Pawn).
 play(Player,L) :- write('New turn for:'), write(Player),
     L > 1,
-    displayBoard,
     ai(L,Player,_,NewBoard),
     applyNewBoard(NewBoard).
 init :-
